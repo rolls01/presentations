@@ -1,0 +1,114 @@
+# Commands
+#### 1. creating server in docker for SSH connection
+1.1
+```sh
+$ cat DockerFiles/centos/Dockerfile
+````
+1.2
+```sh
+$ docker build -t centos_ssh .
+```
+1.3
+```sh
+$ docker images
+```
+1.4
+```sh
+$ docker run -d -P --name centos_sshd_container centos_ssh:latest
+```
+1.5
+```sh
+$ docker inspect -f "{{ .NetworkSettings.IPAddress }}" centos_sshd_container 
+```
+> 172.17.0.3
+
+1.6
+```sh
+$ docker inspect -f "{{ .NetworkSettings.Ports }}" centos_sshd_container
+```
+> map[22/tcp:[{0.0.0.0 49154}]]
+
+1.7
+```sh
+$ nmap 127.17.0.2 -sT -p 80,443,22,49154
+```
+>Starting Nmap 7.92 ( https://nmap.org )
+>Nmap scan report for 127.17.0.3
+>Host is up (0.00013s latency).
+
+>PORT STATE SERVICE
+>22/tcp closed ssh
+>80/tcp closed http
+>443/tcp closed https
+>49154/tcp open unknown
+
+>Nmap done: 1 IP address (1 host up) scanned in 13.12 seconds
+
+#### 2. server configuration to enable connection by SSH
+
+2.1
+```sh
+$ docker ps
+```
+
+2.2
+```sh
+$ docker exec -it [container id] bash
+```
+
+2.3
+```sh
+$ adduser nemo
+```
+
+2.4
+```sh
+$ su nemo
+```
+
+2.5
+```sh
+$ mkdir ~/.ssh
+```
+
+2.6
+```sh
+$ cat ~/.ssh/id_rsa.pub
+```
+
+2.7
+```sh
+$ echo 'ssh-rsa AAAAB3Nza***********************************CHGVpgpPciXrw== kali@kali' >> ~/.ssh/authorized_keys
+```
+
+2.8
+```sh
+$ chmod 600 ~/.ssh/authorized_keys
+$ chmod 700 ~/.ssh
+```
+
+2.9 
+```sh
+$ exit
+$ exit
+```
+
+### 3. SSH into server
+
+3.1
+```sh
+$ ssh nemo@172.17.0.3
+
+```
+
+3.2
+```sh
+$ ssh -p 49154 nemo@127.17.0.3
+
+```
+
+3.3
+```sh
+$ ssh -p 49154 -vvvA nemo@127.17.0.3
+
+```
